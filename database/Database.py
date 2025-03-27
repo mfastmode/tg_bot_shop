@@ -18,3 +18,21 @@ class DataBase():
     async def create_db(self):
         async with self.async_engine.begin() as connect:
             await connect.run_sync(Base.metadata.create_all)
+            
+    # Функция получает инфу о пользователе по тг id (использ в комманде страт)
+    async def get_user(self, user_id):
+        async with self.Session() as request:
+            result = await request.execute(select(Users).where(Users.telegram_id == user_id))
+        # scalar() возвращает 1-ое значение 1-ой строки результата
+        return result.scalar()
+    
+    # Функция добавляет запись в бд 
+    async def add_user(self, name, phone, telegram_id):
+        async with self.Session() as request:
+            request.add(Users(
+                username=name,
+                userphone=phone,
+                telegram_id=telegram_id
+            ))
+            # commit() - применить изменения в бд
+            await request.commit()
